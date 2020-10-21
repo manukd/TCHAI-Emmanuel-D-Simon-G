@@ -1,0 +1,23 @@
+{
+  "name": "tchai_edsg",
+  "version": "1.0.0",
+  "description": "Projet final de Système d'information avancé\r <h3>\r  Auteurs :\r </h3>\r <p> DEREPAS Emmanuel  : Emmanuel_Derepas@etu.u-bourgogne.fr <br/>\r     GAUTHERON Simon  : sgautheron21@gmail.com<br/>\r </p>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manukd/TCHAI-Emmanuel-D-Simon-G.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/manukd/TCHAI-Emmanuel-D-Simon-G/issues"
+  },
+  "homepage": "https://github.com/manukd/TCHAI-Emmanuel-D-Simon-G#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.10.9"
+  }
+}
