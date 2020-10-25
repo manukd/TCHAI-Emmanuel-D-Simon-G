@@ -1,7 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
-const Transaction = require('./schemav2')
+const Transaction = require('./schema')
 const connexion = require('./connexion')
 mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/Transaction', {useNewUrlParser: true})
 
