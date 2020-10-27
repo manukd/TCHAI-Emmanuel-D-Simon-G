@@ -29,7 +29,7 @@ app.post('/', jsonParser, async (req, res) => {
     const hash_update = hash.update((''+personne1+personne2+date+somme),'utf8')
     const hash_res = hash_update.digest('hex')
 
-    if (!personne1 || !personne2 || !date || !somme || !hash1) {
+    if (!personne1 || !personne2 || !date || !somme || !hash_res) {
         res.send("Les élémentes n'ont pas été correctement reçu")
     }
 
