@@ -2,10 +2,10 @@ const express = require('express')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const Transaction = require('./schema')
-const connexion = require('./connexion')
+const connexion = require('../connexion')
 const crypto = require('crypto')
 const hash = crypto.createHash('sha256')
-mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/Transaction', {useNewUrlParser: true})
+mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/Transaction', {useNewUrlParser: true, useUnifiedTopology: true})
 
 
 let app = express()
@@ -27,14 +27,13 @@ app.post('/', jsonParser, async (req, res) => {
     const date = req.query.date
     const somme = req.query.somme
     ////////////////////////////////////////////////
-    let tmp = transactions.length()-1
-    let last_transac = transactions.get(tmp)
-    let last_hash = last_transac.get(hash)
+    let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
+    let last_transac = JSON.parse(JSON.stringify(tmp)).hash1
     ////////////////////////////////////////////////
-    const hash_update = hash.update((personne1+personne2+date+somme+last_hash),'utf8')
+    const hash_update = hash.update((personne1+personne2+date+somme+last_transac),'utf8')
     const hash_res = hash_update.digest('hex')
 
-    if (!personne1 || !personne2 || !date || !somme || !hash_res || !last_hash) {
+    if (!personne1 || !personne2 || !date || !somme || !hash_res || !last_transac) {
         res.send("Les élémentes n'ont pas été correctement reçu")
     }
 
