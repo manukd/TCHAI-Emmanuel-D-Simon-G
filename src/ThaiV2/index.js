@@ -26,7 +26,7 @@ app.post('/', jsonParser, async (req, res) => {
     const personne2 = req.query.personne2
     const date = req.query.date
     const somme = req.query.somme
-    const hash_update = hash.update((''+personne1+personne2+date+somme),'utf8')
+    const hash_update = hash.update((personne1+personne2+date+somme),'utf8')
     const hash_res = hash_update.digest('hex')
 
     if (!personne1 || !personne2 || !date || !somme || !hash_res) {
@@ -82,4 +82,30 @@ app.get('/transactions/:id', async (req, res) => {
     const id = req.params.id
     const transaction = await Transaction.findOne({_id: id})
     res.json(transaction)
+})
+
+app.get('/transactions/verification', async (req, res) => {
+    const transactions = await Transaction.find()
+    let temp = JSON.parse(JSON.stringify(transactions))
+    let transactionsNonConforme
+    let erroner = false
+    for (const prop in temp) {
+        if(temp.hasOwnProperty(prop)) {
+            const personne1 = temp[prop].personne1
+            const personne2 = temp[prop].personne2
+            const date = temp[prop].date
+            const somme = temp[prop].somme
+            const hash_update = hash.update((personne1+personne2+date+somme),'utf8')
+            const hash_res = hash_update.digest('hex')
+            if (hash_res !== temp[prop].hash1) {
+                transactionsNonConforme.push(temp[prop])
+                erroner = true
+            }
+        }
+    }
+    if (erroner) {
+        res.json(transactionsNonConforme)
+    } else {
+        res.send("La vérification des transactions s'est terminé sans trouver d'erreur")
+    }
 })
