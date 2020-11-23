@@ -4,8 +4,8 @@ const bodyParser = require('body-parser')
 const Transaction = require('./schema')
 const connexion = require('../connexion')
 const crypto = require('crypto')
-const hash = crypto.createHash('sha256')
-mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/Transaction', {useNewUrlParser: true, useUnifiedTopology: true})
+
+mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/TransactionV2', {useNewUrlParser: true, useUnifiedTopology: true})
 
 
 let app = express()
@@ -24,8 +24,9 @@ app.listen(port, () => {
 app.post('/', jsonParser, async (req, res) => {
     const personne1 = req.query.personne1
     const personne2 = req.query.personne2
-    const date = req.query.date
+    const date = Date.parse(req.query.date)
     const somme = req.query.somme
+    const hash = crypto.createHash('sha256')
     const hash_update = hash.update((personne1+personne2+date+somme),'utf8')
     const hash_res = hash_update.digest('hex')
 
@@ -84,17 +85,18 @@ app.get('/transactions/:id', async (req, res) => {
     res.json(transaction)
 })
 
-app.get('/transactions/verification', async (req, res) => {
+app.get('/verification', async (req, res) => {
     const transactions = await Transaction.find()
     let temp = JSON.parse(JSON.stringify(transactions))
-    let transactionsNonConforme
+    let transactionsNonConforme = []
     let erroner = false
     for (const prop in temp) {
         if(temp.hasOwnProperty(prop)) {
             const personne1 = temp[prop].personne1
             const personne2 = temp[prop].personne2
-            const date = temp[prop].date
+            const date = Date.parse(temp[prop].date)
             const somme = temp[prop].somme
+            const hash = crypto.createHash('sha256')
             const hash_update = hash.update((personne1+personne2+date+somme),'utf8')
             const hash_res = hash_update.digest('hex')
             if (hash_res !== temp[prop].hash1) {
