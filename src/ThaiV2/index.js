@@ -2,10 +2,10 @@ const express = require('express')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const Transaction = require('./schema')
-const connexion = require('./connexion')
+const connexion = require('../connexion')
 const crypto = require('crypto')
 const hash = crypto.createHash('sha256')
-mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/Transaction', {useNewUrlParser: true})
+mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/Transaction', {useNewUrlParser: true, useUnifiedTopology: true})
 
 
 let app = express()
