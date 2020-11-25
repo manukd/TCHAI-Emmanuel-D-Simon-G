@@ -70,10 +70,52 @@ app.get('/', async (req, res) => {
 
     const ancienSolde3 = solde
 
-    // transaction de p1 à p2 puis de p2 à p3 
-    const transaction = await Transaction.findOne({personne2: personne})
-    transaction.somme = transaction.somme + 50
-    await transaction.save()
+    // transaction de p1 à p2 de 20€
+    const date = new Date()
+    const somme = 20.0
+    let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
+    let last_transac = JSON.parse(JSON.stringify(tmp)).hash1
+    const hash_update = hash.update((personne1+personne2+date+somme+last_transac),'utf8')
+    const hash_res = hash_update.digest('hex')
+
+    if (!personne1 || !personne2 || !date || !somme || !hash_res || !last_transac) {
+        res.send("Les élémentes n'ont pas été correctement reçu")
+    }
+
+    const nouvelleTransaction = new Transaction({
+        personne1: personne1,
+        personne2: personne2,
+        date: date,
+        somme: somme,
+        hash1: hash_res
+    })
+
+    await nouvelleTransaction.save()
+    res.json(nouvelleTransaction)
+
+    // transaction p2 à p3 de 20€
+    
+    const date = new Date()
+    const somme = 20.0
+    let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
+    let last_transac = JSON.parse(JSON.stringify(tmp)).hash1
+    const hash_update = hash.update((personne1+personne2+date+somme+last_transac),'utf8')
+    const hash_res = hash_update.digest('hex')
+
+    if (!personne1 || !personne2 || !date || !somme || !hash_res || !last_transac) {
+        res.send("Les élémentes n'ont pas été correctement reçu")
+    }
+
+    const nouvelleTransaction = new Transaction({
+        personne1: personne2,
+        personne2: personne3,
+        date: date,
+        somme: somme,
+        hash1: hash_res
+    })
+
+    await nouvelleTransaction.save()
+    res.json(nouvelleTransaction)
 
     //solde des personne entermédiaire
 
