@@ -2,16 +2,17 @@ const express = require('express')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const Transaction = require('./schema')
-const connexion = require('./connexion')
+const connexion = require('../connexion')
+const cors = require('cors')
 mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/Transaction', {useNewUrlParser: true})
 
 
 let app = express()
 let port = 8080
-
+app.use(cors())
 var jsonParser = bodyParser.json()
 
-app.get('/', (req, res) => {
+const connexionS = app.get('/', (req, res) => {
     res.send('Hello les AMIZ !')
 })
 
@@ -78,3 +79,5 @@ app.get('/transactions/:id', async (req, res) => {
     const transaction = await Transaction.findOne({_id: id})
     res.json(transaction)
 })
+
+module.exports = {connexionS}
