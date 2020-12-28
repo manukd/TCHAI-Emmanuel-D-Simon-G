@@ -34,6 +34,7 @@ export default {
       ],
       recherche: this.compteP,
       valid: true,
+      rechercheB: false,
       rules: {
         required: value => !!value || 'Ce champ est nécessaire',
       }
@@ -41,6 +42,8 @@ export default {
   },
   async fetch() {
     this.compte = await this.$axios.$get('/transactions/solde/' + this.recherche)
+    console.log(this.compteP)
+    console.log(this.recherche)
     console.log(this.compte)
   }
 }

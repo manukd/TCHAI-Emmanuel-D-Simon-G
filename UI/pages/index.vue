@@ -5,10 +5,6 @@
       color="white"
       flat
     >
-      <v-avatar
-        :color="$vuetify.breakpoint.smAndDown ? 'grey darken-1' : 'transparent'"
-        size="32"
-      ></v-avatar>
 
       <v-tabs
         v-model="tab"
@@ -23,18 +19,6 @@
           {{ onglet.nom }}
         </v-tab>
       </v-tabs>
-
-      <v-avatar
-        class="hidden-sm-and-down"
-        color="grey darken-1 shrink"
-        size="32"
-        v-if="connexion"
-      ></v-avatar>
-      <v-skeleton-loader
-        type="avatar"
-        class="pa-2"
-        v-if="!connexion"
-      ></v-skeleton-loader>
     </v-app-bar>
 
     <v-main class="grey lighten-3">
@@ -47,7 +31,15 @@
                 type="image, article"
                 v-if="!connexion"
               ></v-skeleton-loader>
-              <AfficherSoldePersonne v-if="connexion" :personne="utilisateur"/>
+              <v-container style="height: 400px;" v-if="connexion">
+                <v-row
+                  class="fill-height"
+                  align-content="center"
+                  justify="center"
+                >
+                  <AfficherSoldePersonne v-if="connexion" :compteP="utilisateur"/>
+                </v-row>
+              </v-container>
             </v-sheet>
           </v-col>
 
@@ -79,7 +71,7 @@
                   <AjouterTransaction v-if="onglet.indice === 0" />
                   <ListeTransactions v-if="onglet.indice === 1" />
                   <ListeTransactionsPersonne v-if="onglet.indice === 2" />
-                  <AfficherSoldePersonne v-if="onglet.indice === 3" :compteP="utilisateur" />
+                  <AfficherSoldePersonne v-if="onglet.indice === 3" :compteP="utilisateur" :rechercheB="true" />
                 </v-tab-item>
               </v-tabs-items>
             </v-sheet>
@@ -92,6 +84,35 @@
                 type="image, article"
                 v-if="!connexion"
               ></v-skeleton-loader>
+              <v-container style="height: 400px;" v-if="connexion">
+                <v-row
+                  class="fill-height"
+                  align-content="center"
+                  justify="center"
+                >
+                  <v-col
+                    class="subtitle-1 text-center"
+                    cols="12"
+                  >
+                    <v-btn
+                      color="primary"
+                      @click="chargement = true"
+                      v-if="!chargement"
+                    >
+                      Verification
+                    </v-btn>
+                  </v-col>
+                  <v-col cols="6">
+                    <v-progress-linear
+                      color="deep-purple accent-4"
+                      :active="chargement"
+                      :indeterminate="chargement"
+                      rounded
+                      height="6"
+                    ></v-progress-linear>
+                  </v-col>
+                </v-row>
+              </v-container>
             </v-sheet>
           </v-col>
         </v-row>
@@ -119,6 +140,7 @@ export default {
         {nom: 'Transactions d\'utilisateur', indice: 2},
         {nom: 'Solde utilisateur', indice: 3},
       ],
+      chargement: false
     }
   },
   computed: {
@@ -138,6 +160,13 @@ export default {
     },
     pageInscription() {
       this.$router.push('/inscription')
+    }
+  },
+  watch: {
+    chargement (val) {
+      if (!val) return
+
+      setTimeout(() => (this.chargement = false), 3000)
     }
   }
 }
