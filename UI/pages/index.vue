@@ -11,15 +11,16 @@
       ></v-avatar>
 
       <v-tabs
+        v-model="tab"
         centered
         class="ml-n9"
         color="grey darken-1"
       >
         <v-tab
-          v-for="link in links"
-          :key="link"
+          v-for="onglet in onglets"
+          :key="onglet.nom"
         >
-          {{ link }}
+          {{ onglet.nom }}
         </v-tab>
       </v-tabs>
 
@@ -30,7 +31,6 @@
         v-if="connexion"
       ></v-avatar>
       <v-skeleton-loader
-        v-bind="attrs"
         type="avatar"
         class="pa-2"
         v-if="!connexion"
@@ -45,7 +45,9 @@
               <v-skeleton-loader
                 class="mx-auto"
                 type="image, article"
+                v-if="!connexion"
               ></v-skeleton-loader>
+              <AfficherSoldePersonne v-if="connexion" :personne="utilisateur"/>
             </v-sheet>
           </v-col>
 
@@ -68,8 +70,18 @@
                 </div>
               </v-layout>
             </v-sheet>
-            <v-sheet min-height="70vh" rounded="lg" class="pa-4">
-              Connecté
+            <v-sheet min-height="70vh" rounded="lg" class="pa-4" v-if="connexion">
+              <v-tabs-items v-model="tab" v-if="connexion">
+                <v-tab-item
+                  v-for="onglet in onglets"
+                  :key="onglet.indice"
+                >
+                  <AjouterTransaction v-if="onglet.indice === 0" />
+                  <ListeTransactions v-if="onglet.indice === 1" />
+                  <ListeTransactionsPersonne v-if="onglet.indice === 2" />
+                  <AfficherSoldePersonne v-if="onglet.indice === 3" :compteP="utilisateur" />
+                </v-tab-item>
+              </v-tabs-items>
             </v-sheet>
           </v-col>
 
@@ -78,6 +90,7 @@
               <v-skeleton-loader
                 class="mx-auto"
                 type="image, article"
+                v-if="!connexion"
               ></v-skeleton-loader>
             </v-sheet>
           </v-col>
@@ -90,22 +103,30 @@
 <script>
 import Logo from "../components/Logo";
 import { mapState } from 'vuex'
+import AjouterTransaction from "~/components/AjouterTransaction";
+import ListeTransactions from "~/components/ListeTransactions";
+import ListeTransactionsPersonne from "~/components/ListeTransactionsPersonne";
+import AfficherSoldePersonne from "~/components/AfficherSoldePersonne";
 export default {
-  components: {Logo},
+  components: {AfficherSoldePersonne, ListeTransactionsPersonne, ListeTransactions, AjouterTransaction, Logo},
   data() {
     return {
       text: "",
-      links: [
-        'Dashboard',
-        'Messages',
-        'Profile',
-        'Updates',
+      tab: null,
+      onglets: [
+        {nom: 'Nouvelle Transaction', indice: 0},
+        {nom: 'Transactions', indice: 1},
+        {nom: 'Transactions d\'utilisateur', indice: 2},
+        {nom: 'Solde utilisateur', indice: 3},
       ],
     }
   },
   computed: {
     connexion() {
       return undefined !== this.$store.state.utilisateur.utilisateur._id;
+    },
+    utilisateur() {
+      return this.$store.state.utilisateur.utilisateur.identifiant
     }
   },
   async created() {

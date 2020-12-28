@@ -5,13 +5,18 @@ const Transaction = require('./schema')
 const connexion = require('../connexion')
 const crypto = require('crypto')
 const hash = crypto.createHash('sha256')
-mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/Transaction', {useNewUrlParser: true, useUnifiedTopology: true})
+const cors = require('cors')
+
+mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/TransactionV3', {useNewUrlParser: true, useUnifiedTopology: true})
 
 
 let app = express()
 let port = 8080
 
 var jsonParser = bodyParser.json()
+
+app.use(cors)
+app.use(jsonParser)
 
 app.get('/', (req, res) => {
     res.send('Hello les AMIZ !')
@@ -24,7 +29,7 @@ app.listen(port, () => {
 app.post('/', jsonParser, async (req, res) => {
     const personne1 = req.query.personne1
     const personne2 = req.query.personne2
-    const date = req.query.date
+    const date = Date.now()
     const somme = req.query.somme
     ////////////////////////////////////////////////
     let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
