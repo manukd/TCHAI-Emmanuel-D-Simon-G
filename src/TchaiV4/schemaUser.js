@@ -7,7 +7,8 @@ const schema = mongoose.Schema({
     identifiant: String,
     mdp: String,
     email: String,
-    adresse: String
+    adresse: String,
+    clePrivee: String
 })
 
 module.exports = mongoose.model('user', schema)

@@ -21,39 +21,49 @@ app.use(jsonParser)
 app.use(cors())
 
 app.get('/', (req, res) => {
-    res.send('Hello les AMIZ !')
+    res.send("Hello les AMIZ !")
 })
 
 app.listen(port, () => {
-    console.log('Fonctionne au poil')
+    console.log("Fonctionne au poil")
 })
 
 app.post('/', jsonParser, async (req, res) => {
-    const personne1 = req.body.personne1
-    const personne2 = req.body.personne2
-    const date = Date.now()
-    const somme = req.body.somme
-    ////////////////////////////////////////////////
-    let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
-    let last_transac = JSON.parse(JSON.stringify(tmp)).hash1
-    ////////////////////////////////////////////////
-    const hash = crypto.createHash('sha256')
-    const hash_update = hash.update((personne1+personne2+date+somme+last_transac),'utf8')
-    const hash_res = hash_update.digest('hex')
 
-    if (!personne1 || !personne2 || !date || !somme || !hash_res || !last_transac) {
-        res.send("Les élémentes n'ont pas été correctement reçu")
+    let tmp1 = await Utilisateur.findOne({ _id: req.body.id})
+    if (tmp1) {
+        resultat = true
+    } else {
+        resultat = false
     }
+    if (resultat) {
+        const personne1 = req.body.personne1
+        const personne2 = req.body.personne2
+        const date = Date.now()
+        const somme = req.body.somme
+        ////////////////////////////////////////////////
+        let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
+        let last_transac = JSON.parse(JSON.stringify(tmp)).hash1
+        ////////////////////////////////////////////////
+        const sign = crypto.createSign('sha256')
+        const sign_update = sign.update((personne1+personne2+date+somme+last_transac),'utf8')
+        sign_update.end()
+        const signature = sign.sign(tmp1.clePrivee)
 
-    const nouvelleTransaction = new Transaction({
-        personne1: personne1,
-        personne2: personne2,
-        date: date,
-        somme: somme,
-        hash1: hash_res
-    })
+        if (!personne1 || !personne2 || !date || !somme || !hash_res || !last_transac) {
+            res.send("Les élémentes n'ont pas été correctement reçu")
+        }
 
-    await nouvelleTransaction.save()
+        const nouvelleTransaction = new Transaction({
+            personne1: personne1,
+            personne2: personne2,
+            date: date,
+            somme: somme,
+            hash1: hash_res
+        })
+
+        await nouvelleTransaction.save()
+    }
 })
 
 app.get('/transactions', async (req, res) => {
@@ -109,11 +119,13 @@ app.post('/inscription', async (req, res) => {
 
     const mdp = hash_res
 
-    const hash1 = crypto.createHash('sha256')
-    const hash_update1 = hash1.update((req.body.nom + req.body.prenom + req.body.identifiant + req.body.email + req.body.mdp),'utf8')
-    const hash_res1 = hash_update1.digest('hex')
+    const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+        modulusLength: 515,
+        publicKeyEncoding: { type: "spki", format: "pem" },
+        privateKeyEncoding: { type: "pkcs8", format: "pem"}
+    })
 
-    const adresse = hash_res1
+    const adresse = publicKey
 
     const nouvelUtilisatuer = new Utilisateur({
         nom: req.body.nom,
@@ -121,7 +133,8 @@ app.post('/inscription', async (req, res) => {
         identifiant:req.body.identifiant,
         mdp: mdp,
         email: req.body.email,
-        adresse: adresse
+        adresse: adresse,
+        clePrivee: privateKey
     })
 
     await nouvelUtilisatuer.save()
