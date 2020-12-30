@@ -85,33 +85,7 @@
                 v-if="!connexion"
               ></v-skeleton-loader>
               <v-container style="height: 400px;" v-if="connexion">
-                <v-row
-                  class="fill-height"
-                  align-content="center"
-                  justify="center"
-                >
-                  <v-col
-                    class="subtitle-1 text-center"
-                    cols="12"
-                  >
-                    <v-btn
-                      color="primary"
-                      @click="chargement = true"
-                      v-if="!chargement"
-                    >
-                      Verification
-                    </v-btn>
-                  </v-col>
-                  <v-col cols="6">
-                    <v-progress-linear
-                      color="deep-purple accent-4"
-                      :active="chargement"
-                      :indeterminate="chargement"
-                      rounded
-                      height="6"
-                    ></v-progress-linear>
-                  </v-col>
-                </v-row>
+                <VerificationIntegrite />
               </v-container>
             </v-sheet>
           </v-col>
@@ -128,8 +102,11 @@ import AjouterTransaction from "~/components/AjouterTransaction";
 import ListeTransactions from "~/components/ListeTransactions";
 import ListeTransactionsPersonne from "~/components/ListeTransactionsPersonne";
 import AfficherSoldePersonne from "~/components/AfficherSoldePersonne";
+import VerificationIntegrite from "../components/VerificationIntegrite";
 export default {
-  components: {AfficherSoldePersonne, ListeTransactionsPersonne, ListeTransactions, AjouterTransaction, Logo},
+  components: {
+    VerificationIntegrite,
+    AfficherSoldePersonne, ListeTransactionsPersonne, ListeTransactions, AjouterTransaction, Logo},
   data() {
     return {
       text: "",
@@ -140,7 +117,6 @@ export default {
         {nom: 'Transactions d\'utilisateur', indice: 2},
         {nom: 'Solde utilisateur', indice: 3},
       ],
-      chargement: false
     }
   },
   computed: {
@@ -160,13 +136,6 @@ export default {
     },
     pageInscription() {
       this.$router.push('/inscription')
-    }
-  },
-  watch: {
-    chargement (val) {
-      if (!val) return
-
-      setTimeout(() => (this.chargement = false), 3000)
     }
   }
 }

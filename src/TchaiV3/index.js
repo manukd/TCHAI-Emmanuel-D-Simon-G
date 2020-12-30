@@ -31,14 +31,34 @@ app.post('/', jsonParser, async (req, res) => {
     const personne2 = req.query.personne2
     const date = Date.now()
     const somme = req.query.somme
-    ////////////////////////////////////////////////
-    let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
-    let last_transac = JSON.parse(JSON.stringify(tmp)).hash1
-    ////////////////////////////////////////////////
-    const hash_update = hash.update((personne1+personne2+date+somme+last_transac),'utf8')
-    const hash_res = hash_update.digest('hex')
+    let collectionEmpty = false
+    let tmp = ""
+    let last_transac = ""
+    let hash_update = ""
+    let hash_res = ""
+    await Transaction.count({}, function (err, count) {
+        if (count === 0) {
+            collectionEmpty = true
+        }
+    })
+    if (collectionEmpty) {
+        hash_update = hash.update((personne1+personne2+date+somme+last_transac),'utf8')
+        hash_res = hash_update.digest('hex')
+    } else {
+        tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
+        last_transac = JSON.parse(JSON.stringify(tmp)).hash1
 
-    if (!personne1 || !personne2 || !date || !somme || !hash_res || !last_transac) {
+        hash_update = hash.update((personne1+personne2+date+somme+last_transac),'utf8')
+        hash_res = hash_update.digest('hex')
+    }
+
+
+    if (!personne1 || !personne2 || !date || !somme || !hash_res) {
+        if (collectionEmpty) {
+            if (!last_transac) {
+                res.send("Les élémentes n'ont pas été correctement reçu")
+            }
+        }
         res.send("Les élémentes n'ont pas été correctement reçu")
     }
 
@@ -96,20 +116,19 @@ app.get('/transactions/:id', async (req, res) => {
 app.get('/transactions/verification', async (req, res) => {
     const transactions = await Transaction.find()
     let temp = JSON.parse(JSON.stringify(transactions))
-    let transactionsNonConforme
+    let transactionsNonConforme = []
     let erroner = false
     for (const prop in temp) {
         if(temp.hasOwnProperty(prop)) {
             const personne1 = temp[prop].personne1
             const personne2 = temp[prop].personne2
-            const date = temp[prop].date
+            const date = Date.parse(temp[prop].date)
             const somme = temp[prop].somme
             ////////////////////////////////////////////////
-            let tmp = transactions.length()-1
-            let last_transac = transactions.get(tmp)
-            let last_hash = last_transac.get(hash)
+            let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
+            let last_transac = JSON.parse(JSON.stringify(tmp)).hash1
             ////////////////////////////////////////////////
-            const hash_update = hash.update((personne1+personne2+date+somme+last_hash),'utf8')
+            const hash_update = hash.update((personne1+personne2+date+somme+last_transac),'utf8')
             const hash_res = hash_update.digest('hex')
             if (hash_res !== temp[prop].hash1) {
                 transactionsNonConforme.push(temp[prop])

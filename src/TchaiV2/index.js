@@ -14,6 +14,10 @@ let port = 8080
 var jsonParser = bodyParser.json()
 
 app.get('/', (req, res) => {
+    if (Transaction.findOne())
+    {
+        console.log('Aie')
+    }
     res.send('Hello les AMIZ !')
 })
 

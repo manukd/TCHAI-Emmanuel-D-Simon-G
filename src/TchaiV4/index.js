@@ -29,8 +29,7 @@ app.listen(port, () => {
 })
 
 app.post('/', jsonParser, async (req, res) => {
-
-    let tmp1 = await Utilisateur.findOne({ _id: req.body.id})
+    let tmp1 = await Utilisateur.findOne({ identifiant: req.body.personne1 })
     if (tmp1) {
         resultat = true
     } else {
@@ -43,13 +42,20 @@ app.post('/', jsonParser, async (req, res) => {
         const somme = req.body.somme
         ////////////////////////////////////////////////
         let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
-        let last_transac = JSON.parse(JSON.stringify(tmp)).hash1
+        let last_transac = ""
+        if (null !== tmp) {
+            last_transac = JSON.parse(JSON.stringify(tmp)).hash1
+        }
         ////////////////////////////////////////////////
-        const sign = crypto.createSign('sha256')
-        const sign_update = sign.update((personne1+personne2+date+somme+last_transac),'utf8')
-        sign_update.end()
-        const signature = sign.sign(tmp1.clePrivee)
-
+        const sign = crypto.createSign('SHA256')
+        sign.write(personne1+personne2+date+somme+last_transac)
+        sign.end()
+        const signature = sign.sign(tmp1.clePrivee, "base64")
+        const hash_res = signature
+        /*const verify = crypto.createVerify('SHA256')
+        verify.update((personne1+personne2+date+somme+last_transac),'utf8')
+        verify.end()
+        const status = verify.verify(tmp1.adresse, signature)*/
         if (!personne1 || !personne2 || !date || !somme || !hash_res || !last_transac) {
             res.send("Les élémentes n'ont pas été correctement reçu")
         }
@@ -69,6 +75,55 @@ app.post('/', jsonParser, async (req, res) => {
 app.get('/transactions', async (req, res) => {
     const transactions = await Transaction.find()
     await res.json(transactions)
+})
+
+app.get('/transactions/verification', async (req, res) => {
+    const transactions = await Transaction.find()
+    let a = 1
+    let temp = JSON.parse(JSON.stringify(transactions))
+    let transactionsNonConforme = []
+    let erroner = false
+    let index = 0
+    for (const prop in temp) {
+        if(temp.hasOwnProperty(prop)) {
+            const personne1 = temp[prop].personne1
+            const personne2 = temp[prop].personne2
+            const date = Date.parse(temp[prop].date)
+            const somme = temp[prop].somme
+            ////////////////////////////////////////////////
+            let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
+            index = prop - 1
+            let last_transac =  ''
+            if (index >= 0) {
+                last_transac = temp[index].hash1
+            }
+            ////////////////////////////////////////////////
+            const debiteur = await Utilisateur.findOne({identifiant: personne1})
+            // Test
+
+
+            /*const sign = crypto.createSign('SHA256')
+            sign.update((personne1+personne2+date+somme+last_transac), "utf8")
+            sign.end()
+            const signature = sign.sign(debiteur.clePrivee)
+            const hash_res = signature*/
+
+            // Fin test
+            const verify = crypto.createVerify('SHA256')
+            verify.update((personne1+personne2+date+somme+last_transac), "utf8")
+            verify.end()
+            const status = verify.verify(debiteur.adresse, temp[prop].hash1, "base64")
+            if (!status) {
+                transactionsNonConforme.push(temp[prop])
+                erroner = true
+            }
+        }
+    }
+    if (erroner) {
+        res.json(transactionsNonConforme)
+    } else {
+        res.send("La vérification des transactions s'est terminé sans trouver d'erreur")
+    }
 })
 
 app.get('/transactions/:personne', async (req, res) => {
@@ -98,6 +153,7 @@ app.get('/transactions/solde/:personne', async (req, res) => {
     }
     res.json({"personne": personne, "solde": solde})
 })
+
 
 app.post('/login', async (req, res) => {
     const hash = crypto.createHash('sha256')
@@ -139,32 +195,4 @@ app.post('/inscription', async (req, res) => {
 
     await nouvelUtilisatuer.save()
     res.json(nouvelUtilisatuer)
-})
-
-app.post('/', jsonParser, async (req, res) => {
-    const personne1 = req.query.personne1
-    const personne2 = req.query.personne2
-    const date = Date.now()
-    const somme = req.query.somme
-    ////////////////////////////////////////////////
-    let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
-    let last_transac = JSON.parse(JSON.stringify(tmp)).hash1
-    ////////////////////////////////////////////////
-    const hash_update = hash.update((personne1+personne2+date+somme+last_transac),'utf8')
-    const hash_res = hash_update.digest('hex')
-
-    if (!personne1 || !personne2 || !date || !somme || !hash_res || !last_transac) {
-        res.send("Les élémentes n'ont pas été correctement reçu")
-    }
-
-    const nouvelleTransaction = new Transaction({
-        personne1: personne1,
-        personne2: personne2,
-        date: date,
-        somme: somme,
-        hash1: hash_res
-    })
-
-    await nouvelleTransaction.save()
-    res.json(nouvelleTransaction)
 })
