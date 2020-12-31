@@ -68,7 +68,8 @@ app.post('/', jsonParser, async (req, res) => {
             hash1: hash_res
         })
 
-        await nouvelleTransaction.save()
+        const err = await nouvelleTransaction.save().catch(err => err)
+        res.json(err)
     }
 })
 
@@ -193,6 +194,6 @@ app.post('/inscription', async (req, res) => {
         clePrivee: privateKey
     })
 
-    await nouvelUtilisatuer.save()
-    res.json(nouvelUtilisatuer)
+    await nouvelUtilisatuer.save().catch(err => err)
+    res.json(err)
 })

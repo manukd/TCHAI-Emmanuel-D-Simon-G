@@ -30,11 +30,22 @@ export default {
 
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    "@nuxtjs/toast"
   ],
 
   axios: {
     baseURL:'http://localhost:8080'
+  },
+  toast: {
+    position: "top-center",
+    resgister: [{
+      name: "erreur",
+      message: "Une erreur s'est produite",
+      options: {
+        type: "error"
+      }
+    }]
   },
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {

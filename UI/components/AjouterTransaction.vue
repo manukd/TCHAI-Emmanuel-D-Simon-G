@@ -43,7 +43,7 @@
     <v-btn
       color="error"
       class="mr-4"
-      @click=""
+      @click="RAZ()"
     >
       Annuler
     </v-btn>
@@ -68,8 +68,19 @@ export default {
     }
   },
   methods: {
-    envoyerTransaction() {
-      this.$axios.post('/', this.informationsTransaction)
+    async envoyerTransaction() {
+      const res = await this.$axios.post('/', this.informationsTransaction)
+      if (undefined === res.errors) {
+        this.$toast.success("La transaction a été enregistrée",  { duration: 5000 })
+      } else {
+        this.$toast.error("Une erreur c'est produite",  { duration: 5000 })
+      }
+      this.RAZ()
+    },
+    RAZ() {
+      this.informationsTransaction.personne1 = ""
+      this.informationsTransaction.personne2 = ""
+      this.informationsTransaction.somme = "0"
     }
   }
 }

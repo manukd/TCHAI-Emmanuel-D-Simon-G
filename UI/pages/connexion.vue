@@ -31,8 +31,11 @@ export default {
       const res = await this.$axios.$post("/login", infoConnexion)
       console.log(res)
       if (res.resultat) {
+        this.$toast.success("Vous êtes connecté", { duration: 5000 })
         this.$store.commit('utilisateur/setUtilisateur', res.utilisateur)
         await this.$router.push({path: '/'})
+      } else {
+        this.$toast.error("Connexion échouée", { duration: 5000 })
       }
     }
   }

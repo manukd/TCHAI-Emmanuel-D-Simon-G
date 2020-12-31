@@ -57,6 +57,7 @@ export default {
   methods: {
     async lancerVerification() {
       const probleme = await this.$axios.$get("/transactions/verification")
+      debugger
       if (null !== probleme) {
         this.nbErreurs = probleme.length
       }

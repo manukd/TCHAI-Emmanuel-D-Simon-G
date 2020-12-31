@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const Transaction = require('./schema')
+const Utilisateur = require('./schemaUser')
 const connexion = require('../connexion')
 const crypto = require('crypto')
 const hash = crypto.createHash('sha256')
@@ -13,10 +14,12 @@ mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '
 let app = express()
 let port = 8080
 
-var jsonParser = bodyParser.json()
+const url = bodyParser.urlencoded({ extended: true })
+const jsonParser = bodyParser.json()
 
-app.use(cors)
+app.use(url)
 app.use(jsonParser)
+app.use(cors())
 
 app.get('/', (req, res) => {
     res.send('Hello les AMIZ !')
@@ -26,11 +29,44 @@ app.listen(port, () => {
     console.log('Fonctionne au poil')
 })
 
+
+app.post('/login', async (req, res) => {
+    const hash = crypto.createHash('sha256')
+    const hash_update = hash.update((req.body.mdp),'utf8')
+    const hash_res = hash_update.digest('hex')
+    let tmp1 = await Utilisateur.findOne({ identifiant: req.body.identifiant,  mdp: hash_res })
+    if (tmp1) {
+        resultat = true
+    } else {
+        resultat = false
+    }
+    res.send({utilisateur: tmp1, resultat: resultat})
+})
+
+app.post('/inscription', async (req, res) => {
+    const hash = crypto.createHash('sha256')
+    const hash_update = hash.update((req.body.mdp),'utf8')
+    const hash_res = hash_update.digest('hex')
+
+    const mdp = hash_res
+
+    const nouvelUtilisatuer = new Utilisateur({
+        nom: req.body.nom,
+        prenom: req.body.prenom,
+        identifiant:req.body.identifiant,
+        mdp: mdp,
+        email: req.body.email
+    })
+
+    await nouvelUtilisatuer.save().catch(err => err)
+    res.json(err)
+})
+
 app.post('/', jsonParser, async (req, res) => {
-    const personne1 = req.query.personne1
-    const personne2 = req.query.personne2
+    const personne1 = req.body.personne1
+    const personne2 = req.body.personne2
     const date = Date.now()
-    const somme = req.query.somme
+    const somme = req.body.somme
     let collectionEmpty = false
     let tmp = ""
     let last_transac = ""
@@ -112,7 +148,6 @@ app.get('/transactions/:id', async (req, res) => {
     const transaction = await Transaction.findOne({_id: id})
     res.json(transaction)
 })
-
 app.get('/transactions/verification', async (req, res) => {
     const transactions = await Transaction.find()
     let temp = JSON.parse(JSON.stringify(transactions))
@@ -142,3 +177,4 @@ app.get('/transactions/verification', async (req, res) => {
         res.send("La vérification des transactions s'est terminé sans trouver d'erreur")
     }
 })
+

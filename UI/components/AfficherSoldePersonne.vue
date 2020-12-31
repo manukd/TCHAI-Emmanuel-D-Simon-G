@@ -19,6 +19,14 @@
     </v-btn>
     <v-card-title>Compte : {{ this.compte.personne }}</v-card-title>
     <v-card-text>Solde : {{ this.compte.solde }}</v-card-text>
+    <v-col v-if="!rechercheB">
+      <v-btn
+          class="mr-4"
+          @click="$fetch"
+      >
+        Rafraîchir
+      </v-btn>
+    </v-col>
   </div>
 </template>
 
@@ -42,9 +50,6 @@ export default {
   },
   async fetch() {
     this.compte = await this.$axios.$get('/transactions/solde/' + this.recherche)
-    console.log(this.compteP)
-    console.log(this.recherche)
-    console.log(this.compte)
   }
 }
 </script>

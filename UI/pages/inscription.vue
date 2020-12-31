@@ -27,7 +27,12 @@ export default {
   name: "inscription",
   methods: {
     infoUtilisateur(informationsUtilisateur) {
-      this.$axios.post('/inscription', informationsUtilisateur)
+      const res = this.$axios.post('/inscription', informationsUtilisateur)
+      if (undefined === res.erreurs) {
+        this.$toast.success("Votre inscription s'est correctement déroulée", { duration: 5000 })
+      } else {
+        this.$toast.error("Votre inscription s'est terminé avec une erreur", { duration: 5000 })
+      }
       this.$router.push('/connexion')
     }
   }

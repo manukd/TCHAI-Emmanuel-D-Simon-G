@@ -2,15 +2,24 @@ const express = require('express')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const Transaction = require('./schema')
+const Utilisateur = require('./schemaUser')
 const connexion = require('../connexion')
+const crypto = require('crypto')
+const hash = crypto.createHash('sha256')
 const cors = require('cors')
-mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/Transaction', {useNewUrlParser: true})
+
+mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/TransactionV1', {useNewUrlParser: true, useUnifiedTopology: true})
 
 
 let app = express()
 let port = 8080
+
+const url = bodyParser.urlencoded({ extended: true })
+const jsonParser = bodyParser.json()
+
+app.use(url)
+app.use(jsonParser)
 app.use(cors())
-var jsonParser = bodyParser.json()
 
 const connexionS = app.get('/', (req, res) => {
     res.send('Hello les AMIZ !')
@@ -21,10 +30,10 @@ app.listen(port, () => {
 })
 
 app.post('/', jsonParser, async (req, res) => {
-    const personne1 = req.query.personne1
-    const personne2 = req.query.personne2
-    const date = req.query.date
-    const somme = req.query.somme
+    const personne1 = req.body.personne1
+    const personne2 = req.body.personne2
+    const date = Date.now()
+    const somme = req.body.somme
 
     if (!personne1 || !personne2 || !date || !somme) {
         res.send("Les élémentes n'ont pas été correctement reçu")
@@ -79,5 +88,38 @@ app.get('/transactions/:id', async (req, res) => {
     const transaction = await Transaction.findOne({_id: id})
     res.json(transaction)
 })
+
+app.post('/login', async (req, res) => {
+    const hash = crypto.createHash('sha256')
+    const hash_update = hash.update((req.body.mdp),'utf8')
+    const hash_res = hash_update.digest('hex')
+    let tmp1 = await Utilisateur.findOne({ identifiant: req.body.identifiant,  mdp: hash_res })
+    if (tmp1) {
+        resultat = true
+    } else {
+        resultat = false
+    }
+    res.send({utilisateur: tmp1, resultat: resultat})
+})
+
+app.post('/inscription', async (req, res) => {
+    const hash = crypto.createHash('sha256')
+    const hash_update = hash.update((req.body.mdp),'utf8')
+    const hash_res = hash_update.digest('hex')
+
+    const mdp = hash_res
+
+    const nouvelUtilisatuer = new Utilisateur({
+        nom: req.body.nom,
+        prenom: req.body.prenom,
+        identifiant:req.body.identifiant,
+        mdp: mdp,
+        email: req.body.email
+    })
+
+    await nouvelUtilisatuer.save().catch(err => err)
+    res.json(err)
+})
+
 
 module.exports = {connexionS}
