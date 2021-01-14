@@ -7,6 +7,58 @@ Projet final de Système d'information avancé
     GAUTHERON Simon  : sgautheron21@gmail.com<br/>
 </p>
 
+## Architectures
+    .
+    ├── src                   # Dossier contenant les sources de notre API pour chacune des versions
+    │   ├── TchaiV1           # Version 1 de notre API
+    │   ├── TchaiV2           # Version 2 de notre API
+    │   ├── TchaiV3           # Version 3 de notre API
+    │   ├── TchaiV4           # Version 4 de notre API
+    │   ├── [- #Placer le fichier de connexion ici# -]
+    │   └── index.js
+    ├── test                  # Dossier des attaques des versions V1, V2 et V3
+    │   ├── attaqueTchaiV1    # Attaque de la version 1 de notre API
+    │   ├── attaqueTchaiV2    # Attaque de la version 2 de notre API
+    │   └── attaqueTchaiV3    # Attaque de la version 3 de notre API
+    ├── UI                    # Dossier contenant le framwork de developpement Front-end NuxtJS
+    │   ├──assets             # Dossier des assets de l'application
+    │   ├──components         # Dossier des composants de l'application
+    │   ├──static             # Dossier des éléments statiques de notre application
+    │   ├──store              # Dossier contenant les différents stores que nous utiliserons dans notre application
+    │   ├──pages              # Dossier contenant les pages de notre application et servant de router
+    │   ├──plugins            # Dossier composer des plugins que nous utiliserons (Aucun dans notre cas)
+    │   ├──layouts            # Dossier contenant les layouts de notre application
+    │   ├──middleware         # Dossier contenant les middleware de notre application
+    │   ├──nuxt.config.js     # Fichier de configuration de notre framework NuxtJS
+    │   ├──package.json       # Dépendances de l'application Front-end
+    │   ├──README.md
+    ├── package.json          # Dépendances d'ExpressJS
+    └── README.md
+
+## Dépendances
+### Dépendances Back-end
+```bash
+"dependencies": {
+    "body-parser": "^1.19.0", # -> Permet de gérer les resultats et paramètres des appelles de fonction API
+    "concurrently": "^5.3.0", # -> Permet de créer des scripts de lancement avec plusieurs commandes (runV1, attaqueV1, ...)
+    "cors": "^2.8.5", # -> Permet de gérer les conflit CORS entre le back et le front end en local
+    "express": "^4.17.1", # -> Framework principal pour créer les APIs
+    "mongoose": "^5.10.9", # -> Permet de se connecter et gérer une base de données MongoDB
+    "request": "^2.88.2" # -> Permet de créer un requête directement depuis notre back-end
+  },
+```
+### Dépendances Front-end
+```bash
+"dependencies": {
+    "@nuxtjs/axios": "^5.12.4", # -> Module axios de NuxtJS permettant d'effectuer des requêtes depuis notre Front-end
+    "@nuxtjs/toast": "^3.3.1", # -> Module NuxtJS permettant d'afficher des notifications de type "toast"
+    "core-js": "^3.6.5", # -> Permet 
+    "nuxt": "^2.14.6" # -> Le meilleur Framework de developpement Front-end 
+  },
+  "devDependencies": {
+    "@nuxtjs/vuetify": "^1.11.2" # -> Module NuxtJS permettant d'importer des composants VueJS
+  }
+```
 ## Fonctionnalités
 ### Inscription
 Une fois sur la page d'accueil il est possible de s'inscrire. Il faudra alors renseigner plusieurs informations puis valider. Si l'insciption s'est correctement terminée, une notification sera émise.
@@ -50,6 +102,7 @@ $ npm run attaqueV3
 Se connecter à localhost:3000
 ### Connexion aux attaques Vx
 Se connecter à localhost:8080
+## Tests
 ### Attaque Tchaï V1
 Lors de l'attaque de Tchaï V1, on évalue le solde d'une personne choisit dans le code. Après cela on renregistre ce dernier dans un variable.
 Nous allons ensuite modifier directement dans la base de données, le montant d'une transaction de la personne choisit préalablement.
