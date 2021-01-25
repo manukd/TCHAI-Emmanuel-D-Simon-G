@@ -1,21 +1,30 @@
 <template>
-  <p v-if="$fetchState.pending">Chargement des données</p>
-  <p v-else-if="$fetchState.error">Une erreur c'est produite</p>
-  <v-data-table
-    v-else
-    :headers="headers"
-    :items="donnees"
-    :items-per-page="5"
-    item-key="_id"
-    class="elevation-1"
-    :footer-props="{
-      showFirstLastPage: true,
-      firstIcon: 'mdi-arrow-collapse-left',
-      lastIcon: 'mdi-arrow-collapse-right',
-      prevIcon: 'mdi-minus',
-      nextIcon: 'mdi-plus'
-    }"
-  ></v-data-table>
+  <div>
+    <p v-if="$fetchState.pending">Chargement des données</p>
+    <p v-else-if="$fetchState.error">Une erreur c'est produite</p>
+    <v-data-table
+      v-else
+      :headers="headers"
+      :items="donnees"
+      :items-per-page="5"
+      item-key="_id"
+      class="elevation-1"
+      :footer-props="{
+        showFirstLastPage: true,
+        firstIcon: 'mdi-arrow-collapse-left',
+        lastIcon: 'mdi-arrow-collapse-right',
+        prevIcon: 'mdi-minus',
+        nextIcon: 'mdi-plus'
+      }"
+    ></v-data-table>
+    <v-btn
+        class="mr-4"
+        @click="$fetch"
+        color="success"
+    >
+      Rafraîchir
+    </v-btn>
+  </div>
 </template>
 
 <script>

@@ -5,7 +5,6 @@ const Transaction = require('./schema')
 const Utilisateur = require('./schemaUser')
 const connexion = require('../connexion')
 const crypto = require('crypto')
-const hash = crypto.createHash('sha256')
 const cors = require('cors')
 
 mongoose.connect('mongodb+srv://'+ connexion.user + ':' + connexion.password + '@tchai.yc5xa.mongodb.net/TransactionV3', {useNewUrlParser: true, useUnifiedTopology: true})
@@ -29,6 +28,31 @@ app.listen(port, () => {
     console.log('Fonctionne au poil')
 })
 
+app.get('/transactions/verification', async (req, res) => {
+    const transactions = await Transaction.find()
+    let temp = JSON.parse(JSON.stringify(transactions))
+    let transactionsNonConforme = []
+    let erroner = false
+    for (const prop in temp) {
+        if(temp.hasOwnProperty(prop) && prop > 0) {
+            const personne1 = temp[prop].personne1
+            const personne2 = temp[prop].personne2
+            const date = Date.parse(temp[prop].date)
+            const somme = temp[prop].somme
+            ////////////////////////////////////////////////
+            let last_transac = JSON.parse(JSON.stringify(temp[prop - 1])).hash1
+            ////////////////////////////////////////////////
+            const hash = crypto.createHash('sha256')
+            const hash_update = hash.update((personne1+personne2+date+somme+last_transac),'utf8')
+            const hash_res = hash_update.digest('hex')
+            if (hash_res !== temp[prop].hash1) {
+                transactionsNonConforme.push(temp[prop])
+                erroner = true
+            }
+        }
+    }
+    res.json(transactionsNonConforme)
+})
 
 app.post('/login', async (req, res) => {
     const hash = crypto.createHash('sha256')
@@ -148,33 +172,5 @@ app.get('/transactions/:id', async (req, res) => {
     const transaction = await Transaction.findOne({_id: id})
     res.json(transaction)
 })
-app.get('/transactions/verification', async (req, res) => {
-    const transactions = await Transaction.find()
-    let temp = JSON.parse(JSON.stringify(transactions))
-    let transactionsNonConforme = []
-    let erroner = false
-    for (const prop in temp) {
-        if(temp.hasOwnProperty(prop)) {
-            const personne1 = temp[prop].personne1
-            const personne2 = temp[prop].personne2
-            const date = Date.parse(temp[prop].date)
-            const somme = temp[prop].somme
-            ////////////////////////////////////////////////
-            let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
-            let last_transac = JSON.parse(JSON.stringify(tmp)).hash1
-            ////////////////////////////////////////////////
-            const hash_update = hash.update((personne1+personne2+date+somme+last_transac),'utf8')
-            const hash_res = hash_update.digest('hex')
-            if (hash_res !== temp[prop].hash1) {
-                transactionsNonConforme.push(temp[prop])
-                erroner = true
-            }
-        }
-    }
-    if (erroner) {
-        res.json(transactionsNonConforme)
-    } else {
-        res.send("La vérification des transactions s'est terminé sans trouver d'erreur")
-    }
-})
+
 

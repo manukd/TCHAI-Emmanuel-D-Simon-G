@@ -86,13 +86,12 @@ app.get('/transactions/verification', async (req, res) => {
     let erroner = false
     let index = 0
     for (const prop in temp) {
-        if(temp.hasOwnProperty(prop)) {
+        if(temp.hasOwnProperty(prop) && prop > 0) {
             const personne1 = temp[prop].personne1
             const personne2 = temp[prop].personne2
             const date = Date.parse(temp[prop].date)
             const somme = temp[prop].somme
             ////////////////////////////////////////////////
-            let tmp = await Transaction.findOne({}, {}, { sort: { 'date' : -1 } })
             index = prop - 1
             let last_transac =  ''
             if (index >= 0) {
@@ -120,11 +119,7 @@ app.get('/transactions/verification', async (req, res) => {
             }
         }
     }
-    if (erroner) {
-        res.json(transactionsNonConforme)
-    } else {
-        res.send("La vérification des transactions s'est terminé sans trouver d'erreur")
-    }
+    res.json(transactionsNonConforme)
 })
 
 app.get('/transactions/:personne', async (req, res) => {

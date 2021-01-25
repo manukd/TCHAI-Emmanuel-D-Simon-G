@@ -40,11 +40,11 @@ app.get('/', async (req, res) => {
     const soldeP2post = await calculSolde("p2")
 
     res.json({
-        "Solde du compte P1 avant les transactions intégré par P1": soldeP1pre,
-        "Solde du compte P2 avant les transactions intégré par P1": soldeP2pre,
+        "Solde du compte P1 avant les transactions intégrées par P1": soldeP1pre,
+        "Solde du compte P2 avant les transactions intégrées par P1": soldeP2pre,
         "Montant de la transaction entre P1 et P2": somme,
-        "Solde du compte P1 après les transactions intégré par P1": soldeP1post,
-        "Solde du compte P2 après les transactions intégré par P1": soldeP2post,
+        "Solde du compte P1 après les transactions intégrées par P1": soldeP1post,
+        "Solde du compte P2 après les transactions intégrées par P1": soldeP2post,
     })
 })
 

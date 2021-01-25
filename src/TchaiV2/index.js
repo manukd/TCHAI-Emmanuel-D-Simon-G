@@ -29,6 +29,61 @@ app.listen(port, () => {
     console.log('Fonctionne au poil')
 })
 
+app.get('/transactions/verification', async (req, res) => {
+    const transactions = await Transaction.find()
+    let temp = JSON.parse(JSON.stringify(transactions))
+    let transactionsNonConforme = []
+    let erroner = false
+    for (const prop in temp) {
+        if(temp.hasOwnProperty(prop)) {
+            const personne1 = temp[prop].personne1
+            const personne2 = temp[prop].personne2
+            const date = Date.parse(temp[prop].date)
+            const somme = temp[prop].somme
+            const hash = crypto.createHash('sha256')
+            const hash_update = hash.update((personne1+personne2+date+somme),'utf8')
+            const hash_res = hash_update.digest('hex')
+            if (hash_res !== temp[prop].hash1) {
+                transactionsNonConforme.push(temp[prop])
+                erroner = true
+            }
+        }
+    }
+    res.json(transactionsNonConforme)
+})
+
+app.post('/login', async (req, res) => {
+    const hash = crypto.createHash('sha256')
+    const hash_update = hash.update((req.body.mdp),'utf8')
+    const hash_res = hash_update.digest('hex')
+    let tmp1 = await Utilisateur.findOne({ identifiant: req.body.identifiant,  mdp: hash_res })
+    if (tmp1) {
+        resultat = true
+    } else {
+        resultat = false
+    }
+    res.send({utilisateur: tmp1, resultat: resultat})
+})
+
+app.post('/inscription', async (req, res) => {
+    const hash = crypto.createHash('sha256')
+    const hash_update = hash.update((req.body.mdp),'utf8')
+    const hash_res = hash_update.digest('hex')
+
+    const mdp = hash_res
+
+    const nouvelUtilisatuer = new Utilisateur({
+        nom: req.body.nom,
+        prenom: req.body.prenom,
+        identifiant:req.body.identifiant,
+        mdp: mdp,
+        email: req.body.email
+    })
+
+    await nouvelUtilisatuer.save().catch(err => err)
+    res.json(err)
+})
+
 app.post('/', jsonParser, async (req, res) => {
     const personne1 = req.body.personne1
     const personne2 = req.body.personne2
@@ -93,62 +148,5 @@ app.get('/transactions/:id', async (req, res) => {
     res.json(transaction)
 })
 
-app.get('/verification', async (req, res) => {
-    const transactions = await Transaction.find()
-    let temp = JSON.parse(JSON.stringify(transactions))
-    let transactionsNonConforme = []
-    let erroner = false
-    for (const prop in temp) {
-        if(temp.hasOwnProperty(prop)) {
-            const personne1 = temp[prop].personne1
-            const personne2 = temp[prop].personne2
-            const date = Date.parse(temp[prop].date)
-            const somme = temp[prop].somme
-            const hash = crypto.createHash('sha256')
-            const hash_update = hash.update((personne1+personne2+date+somme),'utf8')
-            const hash_res = hash_update.digest('hex')
-            if (hash_res !== temp[prop].hash1) {
-                transactionsNonConforme.push(temp[prop])
-                erroner = true
-            }
-        }
-    }
-    if (erroner) {
-        res.json(transactionsNonConforme)
-    } else {
-        res.send("La vérification des transactions s'est terminé sans trouver d'erreur")
-    }
-})
 
-app.post('/login', async (req, res) => {
-    const hash = crypto.createHash('sha256')
-    const hash_update = hash.update((req.body.mdp),'utf8')
-    const hash_res = hash_update.digest('hex')
-    let tmp1 = await Utilisateur.findOne({ identifiant: req.body.identifiant,  mdp: hash_res })
-    if (tmp1) {
-        resultat = true
-    } else {
-        resultat = false
-    }
-    res.send({utilisateur: tmp1, resultat: resultat})
-})
-
-app.post('/inscription', async (req, res) => {
-    const hash = crypto.createHash('sha256')
-    const hash_update = hash.update((req.body.mdp),'utf8')
-    const hash_res = hash_update.digest('hex')
-
-    const mdp = hash_res
-
-    const nouvelUtilisatuer = new Utilisateur({
-        nom: req.body.nom,
-        prenom: req.body.prenom,
-        identifiant:req.body.identifiant,
-        mdp: mdp,
-        email: req.body.email
-    })
-
-    await nouvelUtilisatuer.save().catch(err => err)
-    res.json(err)
-})
 
