@@ -8,7 +8,7 @@ Projet final de Système d'information avancé
 </p>
 
 ## Diaporama de présentation
-<link src="https://u.pcloud.link/publink/show?code=XZhN3mXZ2VHcwUaA3GY3Tz30ACoW8faf5Lhy">Présentation</link>
+[Présentation](https://u.pcloud.link/publink/show?code=XZhN3mXZ2VHcwUaA3GY3Tz30ACoW8faf5Lhy)
 
 ## Architectures
     .
