@@ -7,6 +7,9 @@ Projet final de Système d'information avancé
     GAUTHERON Simon  : sgautheron21@gmail.com<br/>
 </p>
 
+## Diaporama de présentation
+<link src="https://u.pcloud.link/publink/show?code=XZhN3mXZ2VHcwUaA3GY3Tz30ACoW8faf5Lhy">Présentation</link>
+
 ## Architectures
     .
     ├── src                   # Dossier contenant les sources de notre API pour chacune des versions
